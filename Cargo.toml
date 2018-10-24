@@ -1,5 +1,5 @@
 [package]
-name = "shortest-way-rs"
+name = "shortest-way"
 version = "0.1.0"
 authors = ["Corentin Jechoux <corentinway@gmail.com>"]
 
