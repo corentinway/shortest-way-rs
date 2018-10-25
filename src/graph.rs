@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Node<'a> {
     /// unique identifier
     id: String,
@@ -40,6 +40,12 @@ impl<'a> Node<'a> {
     pub fn set_value(&mut self, value: i32) {
         self.value = value;
     }
+    pub fn get_value(& self) -> i32 {
+        self.value
+    }
+    pub fn get_next_mut(&self, id: &str) -> Option<&mut Transition<'a>> {
+        self.next.get_mut(id)
+    }
 }
 
 use std::cmp::Ordering;
@@ -64,8 +70,8 @@ impl<'a> PartialEq for Node<'a> {
 impl<'a> Eq for Node<'a> {}
 
 /// This is a transition between 2 nodes
-#[derive(Debug, PartialEq, Clone)]
-struct Transition<'a> {
+#[derive(Debug, PartialEq)]
+pub struct Transition<'a> {
     node: &'a Node<'a>,
     weight: i32,
 }
@@ -77,10 +83,17 @@ impl<'a> Transition<'a> {
             weight: weight + offset,
         }
     }
+    pub fn get_weight(&self) -> i32 {
+        self.weight
+    }
+
+    pub fn get_next_node(&self) -> &'a Node<'a> {
+        &self.node
+    }
 }
 
 #[cfg(test)]
-mod tests {
+mod node_tests {
 
     use super::Node;
     use super::Transition;
@@ -122,6 +135,26 @@ mod tests {
     }
 
     #[test]
+    fn should_get_value() {
+        let id = String::from("123");
+        let offset = 32;
+        let node = Node::with_offset(id, offset);
+        // call
+        node.set_value(13);
+        // assertions
+        assert_eq!(13, node.get_value());
+    }
+
+}
+
+#[cfg(test)]
+mod transition_tests {
+
+    use super::Node;
+    use super::Transition;
+    use std::collections::HashMap;
+
+    #[test]
     fn should_create_a_transition() {
         let node = Node::new("node1".to_string());
         let weight = 10;
@@ -136,6 +169,28 @@ mod tests {
             },
             transition
         );
+    }
+    #[test]
+    fn should_get_a_transition_weight() {
+        let node = Node::new("node1".to_string());
+        let weight = 10;
+        let offset = 33;
+        let transition = Transition::new(&node, weight, offset);
+        // call
+        let weight = transition.get_weight();
+        // assertions
+        assert_eq!(10 + 33, weight);
+    }
+    #[test]
+    fn should_get_a_transition_next_node() {
+        let node = Node::new("node1".to_string());
+        let weight = 10;
+        let offset = 33;
+        let transition = Transition::new(&node, weight, offset);
+        // call
+        let next = transition.get_next_node();
+        // assertions
+        assert_eq!("node1", next.get_id());
     }
     #[test]
     fn should_add_a_next_node() {
@@ -163,5 +218,22 @@ mod tests {
             },
             node1
         );
+    }
+
+    #[test]
+    fn should_get_a_next_transition() {
+        let node3 = Node::new("node3".to_string());
+        let node2 = Node::new("node2".to_string());
+        let mut node1 = Node::new("node1".to_string());
+
+        node1.add_next(&node2, 85);
+        node1.add_next(&node3, 12);
+
+        // call
+        let transition = node1.get_next(node3.get_id());
+
+        // assertions
+        assert_eq!("node3", transition.unwrap().node.get_id());
+        assert_eq!(12, transition.unwrap().weight);
     }
 }

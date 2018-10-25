@@ -4,10 +4,14 @@ pub mod graph;
 
 use graph::Node;
 
+/// find the nearest nodes amond all the nodes that remains in the Vec of nodes
+/// of the graph
 fn find_nearest_node<'a>(nodes: &'a Vec<Node<'a>>) -> Option<&'a Node<'a>> {
     nodes.iter().min()
 }
 
+/// remove a node from the vec of nodes of graph.
+/// The node is found by its identifier.
 fn remove_node(nodes: &mut Vec<Node>, node_to_remove: &Node) {
     let position = nodes
         .iter()
@@ -18,12 +22,27 @@ fn remove_node(nodes: &mut Vec<Node>, node_to_remove: &Node) {
     }
 }
 
+/// update all next nodes of the given node (`node`).
+/// - update the cumulative value
+/// - update its predecessor
+fn update_next_node(next_node_id: &str, node: &mut Node) {
+    let mut transition = node.get_next_mut(next_node_id);
+    if let Some(trans) = transition {
+        let mut next = trans.get_next_node();
+        let distance = trans.get_weight();
+
+        if next.get_value() > node.get_value() + distance {
+            next.set_value( node.get_value() + distance);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
     use super::find_nearest_node;
-    use super::remove_node;
     use super::graph::Node;
+    use super::remove_node;
 
     #[test]
     fn should_find_the_nearest_node_given_no_node() {
@@ -60,18 +79,18 @@ mod tests {
     }
     #[test]
     fn should_remove_a_node_node_given_3_node() {
-        let  node1 = Node::new("node1".to_string());
-        let  node2 = Node::new("node2".to_string());
-        let  node3 = Node::new("node3".to_string());
+        let node1 = Node::new("node1".to_string());
+        let node2 = Node::new("node2".to_string());
+        let node3 = Node::new("node3".to_string());
 
-        let node_to_remove = node1.clone();
+        let node_to_remove = Node::new("node1".to_string());
 
         let mut nodes = vec![node1, node2, node3];
         // call
         remove_node(&mut nodes, &node_to_remove);
         // assertions
-        let  node2 = Node::new("node2".to_string());
-        let  node3 = Node::new("node3".to_string());
+        let node2 = Node::new("node2".to_string());
+        let node3 = Node::new("node3".to_string());
         assert_eq!(nodes, vec![node2, node3]);
     }
 }
