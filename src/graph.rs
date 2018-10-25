@@ -43,7 +43,7 @@ impl<'a> Node<'a> {
     pub fn get_value(& self) -> i32 {
         self.value
     }
-    pub fn get_next_mut(&self, id: &str) -> Option<&mut Transition<'a>> {
+    pub fn get_next_mut(&mut self, id: &str) -> Option<&mut Transition<'a>> {
         self.next.get_mut(id)
     }
 }
@@ -87,7 +87,7 @@ impl<'a> Transition<'a> {
         self.weight
     }
 
-    pub fn get_next_node(&self) -> &'a Node<'a> {
+    pub fn get_next_node(&mut self) -> &'a Node<'a> {
         &self.node
     }
 }
